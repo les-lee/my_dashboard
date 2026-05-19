@@ -1,10 +1,12 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { REDIS_CLIENT } from '../redis/redis.module';
+import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +14,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
   async login(dto: LoginDto) {
@@ -26,6 +29,9 @@ export class AuthService {
     const permissions = this.extractPermissions(user.roles);
     const tokens = await this.signTokens(user.id, user.username, permissions);
     await this.storeRefreshToken(user.id, tokens.refreshToken);
+    // store access token in redis for quick expiry check
+    const accessTtl = this.getExpiresInSeconds(this.config.get('JWT_ACCESS_EXPIRES_IN', '15m'));
+    await this.redis.set(`token:${user.id}`, tokens.accessToken, 'EX', accessTtl);
 
     return {
       ...tokens,
@@ -60,6 +66,8 @@ export class AuthService {
     const profile = await this.profile(payload.sub);
     const tokens = await this.signTokens(profile.id, profile.username, profile.permissions);
     await this.storeRefreshToken(profile.id, tokens.refreshToken);
+    const accessTtl = this.getExpiresInSeconds(this.config.get('JWT_ACCESS_EXPIRES_IN', '15m'));
+    await this.redis.set(`token:${profile.id}`, tokens.accessToken, 'EX', accessTtl);
     return tokens;
   }
 
@@ -103,5 +111,23 @@ export class AuthService {
     await this.prisma.refreshToken.create({
       data: { userId, token, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
     });
+  }
+
+  private getExpiresInSeconds(value: unknown) {
+    // Accept formats like '15m', '1h', '7d' or numeric seconds
+    if (typeof value === 'number') return Math.floor(value);
+    if (typeof value !== 'string') return 0;
+    const v = value.trim();
+    const last = v.slice(-1);
+    const num = parseInt(v.slice(0, -1), 10);
+    if (!Number.isNaN(num)) {
+      if (last === 's') return num;
+      if (last === 'm') return num * 60;
+      if (last === 'h') return num * 60 * 60;
+      if (last === 'd') return num * 24 * 60 * 60;
+    }
+    // fallback: try parse as integer seconds
+    const parsed = parseInt(v, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
   }
 }
