@@ -15,7 +15,7 @@
     "lint-staged": "lint-staged",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "prepare": "husky"
+    "prepare": "node .husky/install.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
