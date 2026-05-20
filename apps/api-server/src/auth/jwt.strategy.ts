@@ -31,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     try {
       const saved = await this.redis.get(key);
       if (!saved || saved !== token) throw new UnauthorizedException('Token expired or invalid');
-    } catch (err) {
+    } catch (_err) {
       throw new UnauthorizedException('Token validation failed');
     }
     return { id: payload.sub, username: payload.username, permissions: payload.permissions };

@@ -10,6 +10,12 @@ export default [
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
+      globals: {
+        document: 'readonly',
+        window: 'readonly',
+        localStorage: 'readonly',
+        Express: "readonly",
+      },
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 2022,
@@ -20,6 +26,15 @@ export default [
       '@typescript-eslint': tsPlugin,
     },
     rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
