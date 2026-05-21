@@ -34,10 +34,11 @@ jobs:
           username: ${{ secrets.ALIYUN_USER }}
           key: ${{ secrets.ALIYUN_SSH_KEY }}
           script: |
+            set -euo pipefail
             cd /opt/fullstack-admin-system
             git pull
             docker compose pull
             docker compose build backend
             docker compose run --rm backend npx prisma migrate deploy --schema prisma/schema.prisma
-            docker compose run --rm backend npm -w apps/api-server exec prisma db seed
+            docker compose run --rm backend npx prisma db seed
             docker compose up -d --build
