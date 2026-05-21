@@ -37,4 +37,7 @@ jobs:
             cd /opt/fullstack-admin-system
             git pull
             docker compose pull
+            docker compose build backend
+            docker compose run --rm backend npx prisma migrate deploy --schema prisma/schema.prisma
+            docker compose run --rm backend npm exec prisma db seed -w apps/api-server
             docker compose up -d --build
