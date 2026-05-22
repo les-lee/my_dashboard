@@ -19,19 +19,7 @@ const permissions = [
 ] as const;
 
 async function main() {
-  const [userCount, roleCount, permissionCount, userRoleCount, rolePermissionCount] = await Promise.all([
-    prisma.user.count(),
-    prisma.role.count(),
-    prisma.permission.count(),
-    prisma.userRole.count(),
-    prisma.rolePermission.count(),
-  ]);
-
-  if (userCount > 0 || roleCount > 0 || permissionCount > 0 || userRoleCount > 0 || rolePermissionCount > 0) {
-    console.log('Database already seeded or partially initialized. Skipping seed.');
-    return;
-  }
-
+  
   const passwordHash = await bcrypt.hash('Admin@123456', 12);
 
   const admin = await prisma.user.upsert({
