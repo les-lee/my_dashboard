@@ -19,7 +19,7 @@ const permissions = [
 ] as const;
 
 async function main() {
-  
+
   const passwordHash = await bcrypt.hash('Admin@123456', 12);
 
   const admin = await prisma.user.upsert({
