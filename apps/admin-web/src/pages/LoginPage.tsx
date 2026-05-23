@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth-store';
 
 export function LoginPage() {
+  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
@@ -11,6 +12,7 @@ export function LoginPage() {
     <main className="login-page">
       <section className="login-panel">
         <Typography.Title level={3}>Admin System</Typography.Title>
+        {contextHolder}
         <Form
           layout="vertical"
           initialValues={{ username: 'admin', password: 'Admin@123456' }}
@@ -18,8 +20,13 @@ export function LoginPage() {
             try {
               await login(values);
               navigate('/');
-            } catch {
-              message.error('登录失败，请检查账号密码');
+            } catch (error: any) {
+              console.error('登录错误', error);
+              const msg =
+                error?.response?.data?.message ||
+                error?.message ||
+                '登录失败，请检查账号密码';
+              messageApi.error(String(msg));
             }
           }}
         >

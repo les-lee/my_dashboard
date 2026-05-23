@@ -1,5 +1,6 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Form, Input, message, Modal, Space, Table, Typography } from 'antd';
+import { Form, Input, Modal, Space, Table, Typography } from 'antd';
+import { globalMessage } from '../utils/global-message';
 import { useEffect, useState } from 'react';
 import { CreateUserRequest, UserRecord, usersApi } from '../api/resources';
 import { PermissionButton } from '../components/PermissionButton';
@@ -30,12 +31,12 @@ export function UserListPage() {
     setConfirmLoading(true);
     try {
       await usersApi.create(values);
-      message.success('用户创建成功');
+      globalMessage.success('用户创建成功');
       setCreateVisible(false);
       form.resetFields();
       reload();
     } catch (error) {
-      message.error('创建用户失败，请检查输入或重试');
+      globalMessage.error('创建用户失败，请检查输入或重试');
     } finally {
       setConfirmLoading(false);
     }
