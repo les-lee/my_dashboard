@@ -19,6 +19,13 @@ export interface UserRecord {
   enabled: boolean;
 }
 
+export interface CreateUserRequest {
+  username: string;
+  displayName: string;
+  email?: string;
+  password: string;
+}
+
 export interface RoleRecord {
   id: number;
   name: string;
@@ -35,6 +42,7 @@ export interface PermissionRecord {
 
 export const usersApi = {
   list: (query: ListQuery) => http.get<unknown, PageResult<UserRecord>>('/users', { params: query }),
+  create: (data: CreateUserRequest) => http.post<CreateUserRequest, UserRecord>('/users', data),
   remove: (id: number) => http.delete(`/users/${id}`),
 };
 
