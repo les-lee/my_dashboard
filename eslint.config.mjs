@@ -15,6 +15,7 @@ export default [
         window: 'readonly',
         localStorage: 'readonly',
         Express: "readonly",
+        console: "readonly",
       },
       parser: tsParser,
       parserOptions: {

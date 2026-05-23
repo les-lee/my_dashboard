@@ -35,7 +35,7 @@ export function UserListPage() {
       setCreateVisible(false);
       form.resetFields();
       reload();
-    } catch (error) {
+    } catch (_error) {
       globalMessage.error('创建用户失败，请检查输入或重试');
     } finally {
       setConfirmLoading(false);
