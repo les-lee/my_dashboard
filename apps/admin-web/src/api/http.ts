@@ -32,7 +32,7 @@ http.interceptors.response.use(
           original.headers.Authorization = `Bearer ${data.data.accessToken}`;
           return http(original);
         } catch (refreshError) {
-          tokenStorage.clearTokens();
+          tokenStorage.clear();
           globalMessage.error('登录已过期，请重新登录');
           return Promise.reject(refreshError);
         }
